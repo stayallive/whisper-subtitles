@@ -3,11 +3,15 @@
 import os
 import whisper
 
-os.makedirs("whisper-cache", exist_ok=True)
+from predict import SUPPORTED_MODEL_NAMES
 
+os.makedirs("whisper-cache", exist_ok=True)
 
 models = whisper.available_models()
 
 for model in models:
+    if model not in SUPPORTED_MODEL_NAMES:
+        continue
+
     print(f"Downloading {model}...")
     whisper._download(whisper._MODELS[model], "whisper-cache", in_memory=False)

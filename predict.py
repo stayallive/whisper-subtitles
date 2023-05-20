@@ -1,30 +1,48 @@
+import os
 import whisper
 from whisper.tokenizer import LANGUAGES
 from cog import BasePredictor, Input, Path, BaseModel
 
+SUPPORTED_MODEL_NAMES = [
+    "tiny.en",
+    "tiny",
+    "base.en",
+    "base",
+    "small.en",
+    "small",
+    "medium.en",
+    "medium",
+]
+
 
 class ModelOutput(BaseModel):
     text: str
-    language: str
-    subtitles: str
+    srt_file: Path
+    vtt_file: Path
 
 
 class Predictor(BasePredictor):
     def predict(
-        self,
-        audio_path: Path = Input(description="Audio file to transcribe"),
-        model_name: str = Input(
-            default="base",
-            choices=whisper.available_models(),
-            description="Name of the Whisper model to use.",
-        ),
-        format: str = Input(
-            default="vtt",
-            choices=["srt", "vtt"],
-            description="Whether to generate subtitles on the SRT or VTT format.",
-        ),
+            self,
+            audio_path: Path = Input(description="Audio file to generate subtitles for."),
+            model_name: str = Input(
+                default="small.en",
+                choices=SUPPORTED_MODEL_NAMES,
+                description="Name of the Whisper model to use.",
+            ),
+            language: str = Input(
+                default="en",
+                choices=LANGUAGES.keys(),
+                description="Language of the audio.",
+            ),
     ) -> ModelOutput:
         """Run a single prediction on the model"""
+
+        if model_name.endswith(".en"):
+            print("English model detected, forcing language to 'en'!")
+            language = "en"
+
+        print(f"Transcribe with {model_name} model and {LANGUAGES[language]} language.")
 
         model = whisper.load_model(
             model_name, download_root="whisper-cache", device="cuda"
@@ -32,18 +50,25 @@ class Predictor(BasePredictor):
 
         result = model.transcribe(
             str(audio_path),
+            language=language,
             verbose=True,
         )
 
-        if (format == 'vtt'):
-            subtitles = generate_vtt(result)
-        else:
-            subtitles = generate_srt(result)
+        audio_basename = os.path.basename(str(audio_path))
+
+        out_path_vtt = f"/tmp/{audio_basename}.{language}.vtt"
+        with open(out_path_vtt, "w", encoding="utf-8") as vtt:
+            vtt.write(generate_vtt(result))
+
+        out_path_srt = f"/tmp/{audio_basename}.{language}.srt"
+        with open(out_path_srt, "w", encoding="utf-8") as srt:
+            srt.write(generate_srt(result))
 
         return ModelOutput(
             text=result["text"],
-            subtitles=subtitles,
             language=LANGUAGES[result["language"]],
+            srt_path=out_path_srt,
+            vtt_path=out_path_vtt,
         )
 
 

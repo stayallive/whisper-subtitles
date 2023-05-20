@@ -1,3 +1,4 @@
 .cog/
+.idea/
 __pycache__/
 whisper-cache/
