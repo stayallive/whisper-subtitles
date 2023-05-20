@@ -42,6 +42,10 @@ class Predictor(BasePredictor):
                 choices=LANGUAGES.keys(),
                 description="Language of the audio.",
             ),
+            vad_filter: bool = Input(
+                default=True,
+                description="Enable the voice activity detection (VAD) to filter out parts of the audio without speech.",
+            ),
     ) -> ModelOutput:
         if model_name.endswith(".en") and language != "en":
             print("English only model detected, forcing language to 'en'!")
@@ -60,10 +64,11 @@ class Predictor(BasePredictor):
         transcription, _ = model.transcribe(
             str(audio_path),
             language=language,
-            vad_filter=True,
+            vad_filter=vad_filter,
             vad_parameters=dict(
                 min_silence_duration_ms=500,
             ),
+            word_timestamps=True,
         )
 
         segments = []
@@ -84,6 +89,8 @@ class Predictor(BasePredictor):
             srt.write(generate_srt(segments))
 
         preview = " ".join([segment.text.strip() for segment in segments[:5]])
+        if len(preview) > 5:
+            preview += f"... (only the first 5 segments are shown, {len(segments) - 5} more segments in subtitles)"
 
         return ModelOutput(
             preview=preview,
