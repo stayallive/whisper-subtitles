@@ -4,7 +4,7 @@ Generate subtitles (`.srt` and `.vtt`) from audio files using [OpenAI's Whisper]
 
 Using [faster-whisper](https://github.com/guillaumekln/faster-whisper), a reimplementation of [OpenAI's Whisper](https://github.com/openai/whisper) model using CTranslate2, which is a fast inference engine for Transformer models.
 
-This is a fork of [m1guelpf/whisper-subtitles](https://replicate.com/m1guelpf/whisper-subtitles) with added support for selecting a language, use the language specific models and download the `.vtt`/`.srt` files directly from the result.
+This is a fork of [m1guelpf/whisper-subtitles](https://replicate.com/m1guelpf/whisper-subtitles) with added support for VAD, selecting a language, use the language specific models and download the `.vtt`/`.srt` files directly from the result.
 
 ## Usage
 
