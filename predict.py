@@ -66,9 +66,8 @@ class Predictor(BasePredictor):
 
         return ModelOutput(
             text=result["text"],
-            language=LANGUAGES[result["language"]],
-            srt_path=out_path_srt,
-            vtt_path=out_path_vtt,
+            srt_file=out_path_srt,
+            vtt_file=out_path_vtt,
         )
 
 
