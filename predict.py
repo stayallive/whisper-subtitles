@@ -36,22 +36,22 @@ class Predictor(BasePredictor):
                 description="Language of the audio.",
             ),
     ) -> ModelOutput:
-        """Run a single prediction on the model"""
-
-        if model_name.endswith(".en"):
-            print("English model detected, forcing language to 'en'!")
+        if model_name.endswith(".en") and language != "en":
+            print("English only model detected, forcing language to 'en'!")
             language = "en"
 
         print(f"Transcribe with {model_name} model and {LANGUAGES[language]} language.")
 
         model = whisper.load_model(
-            model_name, download_root="whisper-cache", device="cuda"
+            model_name,
+            device="cuda",
+            download_root="whisper-cache",
         )
 
         result = model.transcribe(
             str(audio_path),
-            language=language,
             verbose=True,
+            language=language,
         )
 
         audio_basename = os.path.basename(str(audio_path))
