@@ -113,7 +113,7 @@ def format_timestamp(seconds: float, always_include_hours: bool = False):
     milliseconds -= seconds * 1_000
 
     hours_marker = f"{hours}:" if always_include_hours or hours > 0 else ""
-    return f"{hours_marker}{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
+    return f"{hours_marker}{minutes:02d}:{seconds:02d},{milliseconds:03d}"
 
 
 def generate_vtt(result: Iterable[Segment]):
@@ -129,5 +129,5 @@ def generate_srt(result: Iterable[Segment]):
     for i, segment in enumerate(result, start=1):
         srt += f"{i}\n"
         srt += f"{format_timestamp(segment.start, always_include_hours=True)} --> {format_timestamp(segment.end, always_include_hours=True)}\n"
-        srt += f"{segment.text.strip().replace('-->', '->')}\n"
+        srt += f"{segment.text.strip().replace('-->', '->')}\n\n"
     return srt
